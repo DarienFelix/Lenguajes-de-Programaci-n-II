@@ -1,0 +1,108 @@
+create database micoppel;
+
+use micoppel
+create table mitabla(
+-- =========================================
+-- CREAR BASE DE DATOS
+-- =========================================
+CREATE DATABASE EmpresaUNI;
+GO
+
+USE EmpresaUNI;
+GO
+
+-- =========================================
+-- TABLA: Centro_Trabajo
+-- =========================================
+CREATE TABLE Centro_Trabajo (
+    id_centro INT PRIMARY KEY,
+    nombre_centro VARCHAR(100) NOT NULL,
+    ciudad VARCHAR(50) NOT NULL
+);
+GO
+
+-- =========================================
+-- TABLA: Empleado
+-- =========================================
+CREATE TABLE Empleado (
+    id_empleado INT IDENTITY(1,1) PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    apellido_paterno VARCHAR(50) NOT NULL,
+    apellido_materno VARCHAR(50) NOT NULL,
+    fecha_nacimiento DATE NOT NULL,
+    rfc VARCHAR(20) NOT NULL,
+    puesto VARCHAR(50) NOT NULL,
+    descripcion_puesto VARCHAR(100),
+    id_centro INT NOT NULL,
+    es_directivo BIT NOT NULL,
+
+    CONSTRAINT FK_Empleado_Centro
+    FOREIGN KEY (id_centro) REFERENCES Centro_Trabajo(id_centro)
+);
+GO
+
+-- =========================================
+-- TABLA: Directivo
+-- =========================================
+CREATE TABLE Directivo (
+    id_empleado INT PRIMARY KEY,
+    centro_supervisa INT NOT NULL,
+    apoyo_combustible BIT NOT NULL,
+
+    CONSTRAINT FK_Directivo_Empleado
+    FOREIGN KEY (id_empleado) REFERENCES Empleado(id_empleado),
+
+    CONSTRAINT FK_Directivo_Centro
+    FOREIGN KEY (centro_supervisa) REFERENCES Centro_Trabajo(id_centro)
+);
+GO
+
+-- =========================================
+-- INSERTAR DATOS EN Centro_Trabajo
+-- (Diferentes al ejemplo original)
+-- =========================================
+INSERT INTO Centro_Trabajo VALUES
+(201, 'Sucursal Norte Tecnología', 'Guadalajara'),
+(202, 'Sucursal Sur Hogar', 'Monterrey'),
+(203, 'Sucursal Centro Electrónica', 'Ciudad de México'),
+(204, 'Sucursal Poniente Moda', 'Zapopan'),
+(205, 'Sucursal Oriente Almacén', 'Puebla');
+GO
+
+-- =========================================
+-- INSERTAR EMPLEADOS
+-- =========================================
+INSERT INTO Empleado
+(nombre, apellido_paterno, apellido_materno, fecha_nacimiento, rfc, puesto, descripcion_puesto, id_centro, es_directivo)
+VALUES
+('Luis', 'Hernández', 'García', '1992-03-15', 'HEGL920315XXX', 'Ventas', 'Atención a clientes', 201, 0),
+('Ana', 'Torres', 'López', '1988-07-22', 'TOLA880722XXX', 'Gerente', 'Administración general', 202, 1),
+('Miguel', 'Castro', 'Ruiz', '1995-11-05', 'CARM951105XXX', 'Almacén', 'Control de inventario', 205, 0),
+('Sofía', 'Martínez', 'Nava', '1987-01-30', 'MANS870130XXX', 'Directora', 'Supervisión regional', 203, 1);
+GO
+
+-- =========================================
+-- INSERTAR DIRECTIVOS
+-- =========================================
+INSERT INTO Directivo VALUES
+(2, 203, 1), -- Ana supervisa otro centro
+(4, 204, 1); -- Sofía supervisa otro centro
+GO
+
+-- =========================================
+-- CONSULTA FINAL (REPORTE)
+-- =========================================
+SELECT 
+    e.id_empleado AS 'Número de Empleado',
+    e.nombre + ' ' + e.apellido_paterno + ' ' + e.apellido_materno AS 'Nombre Completo',
+    e.fecha_nacimiento AS 'Fecha de Nacimiento',
+    e.rfc AS 'RFC',
+    c.nombre_centro AS 'Nombre del Centro',
+    e.puesto AS 'Puesto',
+    CASE 
+        WHEN e.es_directivo = 1 THEN 'Sí'
+        ELSE 'No'
+    END AS '¿Es Directivo?'
+FROM Empleado e
+INNER JOIN Centro_Trabajo c ON e.id_centro = c.id_centro;
+GO
